@@ -1,0 +1,992 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Mi Agente de Contenido ✨</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F0E9DF;
+    --card: #FBF7F2;
+    --espresso: #2C1A0E;
+    --mocha: #7A4F2D;
+    --latte: #C8A882;
+    --cream: #FBF7F2;
+    --sage: #8FA882;
+    --dusty: #B5907A;
+    --blush: #E8D5C4;
+    --ink: rgba(44,26,14,0.7);
+    --ink-light: rgba(44,26,14,0.4);
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    background: var(--bg);
+    font-family: 'Jost', sans-serif;
+    color: var(--espresso);
+    min-height: 100vh;
+    padding-bottom: 60px;
+  }
+
+  /* noise texture */
+  body::before {
+    content:'';
+    position:fixed;
+    inset:0;
+    background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+    pointer-events:none;
+    z-index:0;
+  }
+
+  .wrap { position:relative; z-index:1; max-width:480px; margin:0 auto; padding:0 16px; }
+
+  /* HEADER */
+  .header {
+    background: var(--espresso);
+    margin: 0 -16px;
+    padding: 44px 28px 32px;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 24px;
+  }
+  .header::after {
+    content:'';
+    position:absolute;
+    bottom:-60px; right:-40px;
+    width:200px; height:200px;
+    border-radius:50%;
+    background: radial-gradient(circle, rgba(200,168,130,0.15) 0%, transparent 70%);
+  }
+  .header-date {
+    font-size:10px;
+    letter-spacing:3px;
+    text-transform:uppercase;
+    color:var(--latte);
+    margin-bottom:10px;
+    font-weight:500;
+  }
+  .header h1 {
+    font-family:'Cormorant Garamond', serif;
+    font-size:36px;
+    font-weight:300;
+    color:var(--cream);
+    line-height:1.1;
+  }
+  .header h1 em { color:var(--latte); font-style:italic; }
+  .header-sub {
+    font-size:12px;
+    color:rgba(251,247,242,0.4);
+    margin-top:8px;
+    font-weight:300;
+  }
+
+  /* TODAY CARD */
+  .today-pill {
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    background:rgba(200,168,130,0.15);
+    border:1px solid rgba(200,168,130,0.3);
+    border-radius:40px;
+    padding:6px 14px;
+    font-size:11px;
+    color:var(--latte);
+    letter-spacing:1px;
+    text-transform:uppercase;
+    font-weight:500;
+    margin-bottom:20px;
+  }
+
+  /* CARDS */
+  .card {
+    background:var(--card);
+    border-radius:20px;
+    padding:22px;
+    margin-bottom:14px;
+    border:1px solid rgba(44,26,14,0.07);
+    position:relative;
+    overflow:hidden;
+  }
+  .card-header {
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-bottom:16px;
+  }
+  .card-icon {
+    width:36px; height:36px;
+    border-radius:10px;
+    display:flex; align-items:center; justify-content:center;
+    font-size:18px;
+    flex-shrink:0;
+  }
+  .card-title {
+    font-family:'Cormorant Garamond', serif;
+    font-size:18px;
+    font-weight:600;
+    color:var(--espresso);
+  }
+  .card-subtitle {
+    font-size:11px;
+    color:var(--ink-light);
+    letter-spacing:1px;
+    text-transform:uppercase;
+    margin-top:1px;
+  }
+
+  /* POST DEL DÍA */
+  .post-type-badge {
+    display:inline-flex;
+    align-items:center;
+    gap:5px;
+    padding:4px 12px;
+    border-radius:20px;
+    font-size:10px;
+    font-weight:600;
+    letter-spacing:1px;
+    text-transform:uppercase;
+    margin-bottom:10px;
+  }
+  .badge-reel { background:linear-gradient(135deg,#833AB4,#FD1D1D); color:white; }
+  .badge-carrusel { background:rgba(122,79,45,0.12); color:var(--mocha); border:1px solid rgba(122,79,45,0.2); }
+  .badge-lifestyle { background:rgba(143,168,130,0.15); color:#5a7a50; border:1px solid rgba(143,168,130,0.3); }
+  .badge-outfit { background:rgba(200,168,130,0.18); color:var(--mocha); }
+  .badge-tiktok { background:#0f0f0f; color:#69C9D0; }
+
+  .post-title {
+    font-family:'Cormorant Garamond', serif;
+    font-size:22px;
+    font-weight:600;
+    line-height:1.3;
+    margin-bottom:6px;
+    color:var(--espresso);
+  }
+  .post-time {
+    font-size:12px;
+    color:var(--dusty);
+    font-weight:500;
+    margin-bottom:14px;
+    display:flex;
+    align-items:center;
+    gap:5px;
+  }
+
+  /* COPY BOXES */
+  .copy-section { margin-bottom:14px; }
+  .copy-label {
+    font-size:10px;
+    letter-spacing:2px;
+    text-transform:uppercase;
+    color:var(--ink-light);
+    font-weight:600;
+    margin-bottom:6px;
+  }
+  .copy-box {
+    background:var(--bg);
+    border-radius:12px;
+    padding:14px;
+    font-size:13px;
+    line-height:1.7;
+    color:var(--ink);
+    border:1px solid rgba(44,26,14,0.07);
+    white-space:pre-wrap;
+    position:relative;
+  }
+  .copy-btn {
+    position:absolute;
+    top:10px; right:10px;
+    background:var(--espresso);
+    color:var(--cream);
+    border:none;
+    border-radius:8px;
+    padding:5px 10px;
+    font-size:10px;
+    font-weight:500;
+    letter-spacing:0.5px;
+    cursor:pointer;
+    font-family:'Jost',sans-serif;
+    transition:opacity 0.15s;
+  }
+  .copy-btn:hover { opacity:0.8; }
+  .copy-btn.copied { background:var(--sage); }
+
+  /* GENERATION AREA */
+  .gen-box {
+    background:var(--bg);
+    border-radius:14px;
+    padding:16px;
+    font-size:13px;
+    line-height:1.7;
+    color:var(--ink);
+    border:1px solid rgba(44,26,14,0.07);
+    min-height:80px;
+    position:relative;
+  }
+  .gen-placeholder {
+    color:var(--ink-light);
+    font-style:italic;
+    font-size:13px;
+  }
+
+  /* LOADING */
+  .loading {
+    display:flex;
+    align-items:center;
+    gap:8px;
+    color:var(--ink-light);
+    font-size:13px;
+    font-style:italic;
+  }
+  .dots span {
+    display:inline-block;
+    width:5px; height:5px;
+    border-radius:50%;
+    background:var(--latte);
+    animation:bounce 1.2s infinite;
+    margin:0 1px;
+  }
+  .dots span:nth-child(2) { animation-delay:0.2s; }
+  .dots span:nth-child(3) { animation-delay:0.4s; }
+  @keyframes bounce {
+    0%,80%,100% { transform:scale(0.6); opacity:0.4; }
+    40% { transform:scale(1); opacity:1; }
+  }
+
+  /* BUTTONS */
+  .btn-primary {
+    width:100%;
+    background:var(--espresso);
+    color:var(--cream);
+    border:none;
+    border-radius:14px;
+    padding:15px;
+    font-family:'Jost',sans-serif;
+    font-size:14px;
+    font-weight:500;
+    letter-spacing:0.5px;
+    cursor:pointer;
+    transition:opacity 0.2s, transform 0.15s;
+    margin-top:10px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+  }
+  .btn-primary:hover { opacity:0.88; transform:translateY(-1px); }
+  .btn-primary:disabled { opacity:0.4; cursor:not-allowed; transform:none; }
+
+  .btn-secondary {
+    width:100%;
+    background:transparent;
+    color:var(--mocha);
+    border:1.5px solid rgba(122,79,45,0.25);
+    border-radius:14px;
+    padding:13px;
+    font-family:'Jost',sans-serif;
+    font-size:13px;
+    font-weight:500;
+    cursor:pointer;
+    transition:all 0.2s;
+    margin-top:8px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+  }
+  .btn-secondary:hover { background:rgba(122,79,45,0.06); border-color:rgba(122,79,45,0.4); }
+
+  /* TRENDING */
+  .trend-item {
+    display:flex;
+    align-items:flex-start;
+    gap:12px;
+    padding:12px 0;
+    border-bottom:1px solid rgba(44,26,14,0.06);
+  }
+  .trend-item:last-child { border-bottom:none; }
+  .trend-emoji { font-size:20px; flex-shrink:0; margin-top:1px; }
+  .trend-content {}
+  .trend-name { font-size:14px; font-weight:500; margin-bottom:2px; }
+  .trend-desc { font-size:12px; color:var(--ink-light); line-height:1.5; }
+  .trend-tag {
+    display:inline-block;
+    font-size:9px;
+    padding:2px 8px;
+    border-radius:20px;
+    background:rgba(143,168,130,0.15);
+    color:#5a7a50;
+    font-weight:600;
+    letter-spacing:1px;
+    text-transform:uppercase;
+    margin-top:5px;
+  }
+
+  /* EDICION TIPS */
+  .tip-row {
+    display:flex;
+    gap:10px;
+    align-items:flex-start;
+    padding:10px 0;
+    border-bottom:1px solid rgba(44,26,14,0.05);
+  }
+  .tip-row:last-child { border-bottom:none; }
+  .tip-num {
+    font-family:'Cormorant Garamond',serif;
+    font-size:22px;
+    color:var(--latte);
+    font-weight:300;
+    line-height:1;
+    flex-shrink:0;
+    width:24px;
+  }
+  .tip-text { font-size:13px; line-height:1.6; color:var(--ink); padding-top:2px; }
+
+  /* ALARM SECTION */
+  .alarm-card {
+    background: var(--espresso);
+    border-radius:20px;
+    padding:22px;
+    margin-bottom:14px;
+    color:var(--cream);
+  }
+  .alarm-title {
+    font-family:'Cormorant Garamond',serif;
+    font-size:20px;
+    font-weight:600;
+    margin-bottom:6px;
+    color:var(--latte);
+    font-style:italic;
+  }
+  .alarm-desc {
+    font-size:12px;
+    opacity:0.5;
+    line-height:1.6;
+    margin-bottom:16px;
+    font-weight:300;
+  }
+  .alarm-steps {
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+  .alarm-step {
+    display:flex;
+    align-items:center;
+    gap:12px;
+    font-size:13px;
+    opacity:0.8;
+  }
+  .alarm-step-num {
+    width:24px; height:24px;
+    border-radius:50%;
+    background:rgba(200,168,130,0.2);
+    color:var(--latte);
+    font-size:11px;
+    font-weight:600;
+    display:flex; align-items:center; justify-content:center;
+    flex-shrink:0;
+  }
+
+  /* DIVIDER */
+  .divider {
+    text-align:center;
+    font-size:10px;
+    letter-spacing:3px;
+    text-transform:uppercase;
+    color:var(--ink-light);
+    margin:24px 0 10px;
+    font-weight:500;
+  }
+
+  /* SECTION LABEL */
+  .sec-label {
+    font-size:10px;
+    letter-spacing:3px;
+    text-transform:uppercase;
+    color:var(--mocha);
+    font-weight:600;
+    margin-bottom:12px;
+    margin-top:24px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .sec-label::after {
+    content:'';
+    flex:1;
+    height:1px;
+    background:linear-gradient(to right, rgba(122,79,45,0.2), transparent);
+  }
+
+  textarea.input-area {
+    width:100%;
+    background:var(--bg);
+    border:1.5px solid rgba(44,26,14,0.12);
+    border-radius:12px;
+    padding:12px 14px;
+    font-family:'Jost',sans-serif;
+    font-size:13px;
+    color:var(--espresso);
+    resize:none;
+    height:70px;
+    margin-top:8px;
+    outline:none;
+    transition:border-color 0.2s;
+  }
+  textarea.input-area:focus { border-color:var(--latte); }
+  textarea.input-area::placeholder { color:var(--ink-light); }
+
+  .hashtags-box {
+    background:var(--bg);
+    border-radius:12px;
+    padding:12px 14px;
+    font-size:12px;
+    color:#3897f0;
+    line-height:1.8;
+    border:1px solid rgba(44,26,14,0.07);
+    white-space:pre-wrap;
+    position:relative;
+  }
+
+  /* CALENDAR MINI */
+  .mini-cal {
+    display:grid;
+    grid-template-columns:repeat(7,1fr);
+    gap:4px;
+    margin-top:8px;
+  }
+  .mc-day {
+    aspect-ratio:1;
+    border-radius:8px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:11px;
+    font-weight:400;
+    background:rgba(44,26,14,0.04);
+    color:var(--ink-light);
+  }
+  .mc-day.has-post { background:rgba(200,168,130,0.2); color:var(--mocha); font-weight:600; }
+  .mc-day.today { background:var(--espresso); color:var(--cream); font-weight:600; }
+  .mc-day.empty { background:transparent; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-date" id="headerDate">Cargando...</div>
+    <h1>Tu agente<br><em>de contenido</em> ✨</h1>
+    <div class="header-sub">Italia · Francia · Viajes · Moda · Soft Life</div>
+  </div>
+
+  <!-- POST DEL DÍA -->
+  <div class="today-pill">📅 Post de mañana</div>
+
+  <div class="card" id="postDelDia">
+    <div class="card-header">
+      <div class="card-icon" style="background:rgba(200,168,130,0.15);">📌</div>
+      <div>
+        <div class="card-title">Post programado</div>
+        <div class="card-subtitle">Según tu calendario de mayo</div>
+      </div>
+    </div>
+    <div id="tomorrowPost">
+      <!-- filled by JS -->
+    </div>
+  </div>
+
+  <!-- GENERADOR DE COPY -->
+  <div class="sec-label">Generador de copy con IA</div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon" style="background:rgba(143,168,130,0.15);">✍️</div>
+      <div>
+        <div class="card-title">Copy para Instagram</div>
+        <div class="card-subtitle">Caption + hashtags</div>
+      </div>
+    </div>
+    <div class="copy-label">Contexto adicional (opcional)</div>
+    <textarea class="input-area" id="igContext" placeholder="Ej: foto en el canal de Venecia al amanecer, colores dorados..."></textarea>
+    <button class="btn-primary" id="btnGenIG" onclick="generateCopy('ig')">
+      <span>✨</span> Generar caption para Instagram
+    </button>
+    <div id="igResult" style="margin-top:12px; display:none;">
+      <div class="copy-label" style="margin-bottom:6px;">Caption listo para copiar</div>
+      <div class="copy-box" id="igCopyText" style="padding-right:70px;">
+        <button class="copy-btn" onclick="copyText('igCopyText', this)">Copiar</button>
+      </div>
+      <div class="copy-label" style="margin-top:10px; margin-bottom:6px;">Hashtags</div>
+      <div class="hashtags-box" id="igHashtags" style="position:relative;">
+        <button class="copy-btn" onclick="copyText('igHashtags', this)">Copiar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon" style="background:#0f0f0f;">
+        <span style="font-size:16px;">🎵</span>
+      </div>
+      <div>
+        <div class="card-title" style="color:#000;">Copy para TikTok</div>
+        <div class="card-subtitle">Hook + descripción viral</div>
+      </div>
+    </div>
+    <button class="btn-primary" style="background:#0f0f0f;" id="btnGenTT" onclick="generateCopy('tt')">
+      <span>🎬</span> Generar copy para TikTok
+    </button>
+    <div id="ttResult" style="margin-top:12px; display:none;">
+      <div class="copy-label" style="margin-bottom:6px;">Hook + caption TikTok</div>
+      <div class="copy-box" id="ttCopyText" style="padding-right:70px;">
+        <button class="copy-btn" onclick="copyText('ttCopyText', this)">Copiar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon" style="background:linear-gradient(135deg,#833AB4,#FD1D1D);">
+        <span style="font-size:16px; filter:brightness(10);">📖</span>
+      </div>
+      <div>
+        <div class="card-title">Story del día</div>
+        <div class="card-subtitle">Texto + CTA para stories</div>
+      </div>
+    </div>
+    <button class="btn-primary" style="background:linear-gradient(135deg,#833AB4,#FD1D1D);" id="btnGenStory" onclick="generateCopy('story')">
+      <span>💬</span> Generar idea de story
+    </button>
+    <div id="storyResult" style="margin-top:12px; display:none;">
+      <div class="copy-box" id="storyCopyText" style="padding-right:70px;">
+        <button class="copy-btn" onclick="copyText('storyCopyText', this)">Copiar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TRENDING -->
+  <div class="sec-label">Tendencias del momento</div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon" style="background:rgba(181,144,122,0.15);">🔥</div>
+      <div>
+        <div class="card-title">Trending Topics</div>
+        <div class="card-subtitle">Farándula ARG · Girlies · Moda · Amor</div>
+      </div>
+    </div>
+    <button class="btn-primary" id="btnTrending" onclick="fetchTrending()">
+      <span>🌐</span> Buscar tendencias de hoy
+    </button>
+    <div id="trendingResult" style="margin-top:14px; display:none;"></div>
+  </div>
+
+  <!-- TIPS DE EDICIÓN -->
+  <div class="sec-label">Tips de edición del día</div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon" style="background:rgba(200,168,130,0.15);">🎬</div>
+      <div>
+        <div class="card-title">Edición para hoy</div>
+        <div class="card-subtitle">Según el tipo de post del día</div>
+      </div>
+    </div>
+    <button class="btn-primary" id="btnEdicion" onclick="getEdicionTips()">
+      <span>✂️</span> Ver tips de edición
+    </button>
+    <div id="edicionResult" style="margin-top:14px; display:none;"></div>
+  </div>
+
+  <!-- ALARMA -->
+  <div class="sec-label">Recordatorio diario</div>
+
+  <div class="alarm-card">
+    <div class="alarm-title">Configurá tu alarma 🔔</div>
+    <div class="alarm-desc">Para que no se te pase ningún post. Guardá esta página en favoritos y configurá una alarma en el celu que diga "abrir agente de contenido".</div>
+    <div class="alarm-steps">
+      <div class="alarm-step">
+        <div class="alarm-step-num">1</div>
+        <span>Abrí esta página desde el navegador del celu</span>
+      </div>
+      <div class="alarm-step">
+        <div class="alarm-step-num">2</div>
+        <span>Tocá los 3 puntitos → "Añadir a pantalla de inicio"</span>
+      </div>
+      <div class="alarm-step">
+        <div class="alarm-step-num">3</div>
+        <span>Configurá alarma diaria a la hora que quieras (ej: 8am)</span>
+      </div>
+      <div class="alarm-step">
+        <div class="alarm-step-num">4</div>
+        <span>¡Cada mañana abrís el ícono y tenés todo listo! ✨</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- MINI CALENDARIO -->
+  <div class="sec-label">Mayo de un vistazo</div>
+  <div class="card">
+    <div style="display:grid; grid-template-columns:repeat(7,1fr); gap:4px; margin-bottom:6px;">
+      <div style="text-align:center;font-size:9px;letter-spacing:1px;opacity:0.4;text-transform:uppercase;">L</div>
+      <div style="text-align:center;font-size:9px;letter-spacing:1px;opacity:0.4;text-transform:uppercase;">M</div>
+      <div style="text-align:center;font-size:9px;letter-spacing:1px;opacity:0.4;text-transform:uppercase;">M</div>
+      <div style="text-align:center;font-size:9px;letter-spacing:1px;opacity:0.4;text-transform:uppercase;">J</div>
+      <div style="text-align:center;font-size:9px;letter-spacing:1px;opacity:0.4;text-transform:uppercase;">V</div>
+      <div style="text-align:center;font-size:9px;letter-spacing:1px;opacity:0.4;text-transform:uppercase;">S</div>
+      <div style="text-align:center;font-size:9px;letter-spacing:1px;opacity:0.4;text-transform:uppercase;">D</div>
+    </div>
+    <div class="mini-cal" id="miniCal"></div>
+    <div style="display:flex;gap:14px;margin-top:12px;flex-wrap:wrap;">
+      <div style="display:flex;align-items:center;gap:5px;font-size:11px;opacity:0.6;">
+        <div style="width:8px;height:8px;border-radius:2px;background:rgba(200,168,130,0.3);"></div> Post programado
+      </div>
+      <div style="display:flex;align-items:center;gap:5px;font-size:11px;opacity:0.6;">
+        <div style="width:8px;height:8px;border-radius:2px;background:#2C1A0E;"></div> Hoy
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ═══════════════════════════════════════════
+// CALENDARIO DE CONTENIDO — MAYO 2026
+// ═══════════════════════════════════════════
+const CALENDAR = {
+  1:  { type:'reel',      platform:'IG+TT', title:'Trailer del viaje', desc:'13 días en Europa — todo lo que pasó', time:'18:00', cat:'viaje' },
+  2:  { type:'stories',   platform:'IG',    title:'BTS del viaje', desc:'Encuesta: ¿Adivinás el primer destino?', time:'12:00', cat:'stories' },
+  3:  { type:'outfit',    platform:'IG+TT', title:'Outfit check ofi', desc:'Lo que me puse un martes random 🤎', time:'17:00', cat:'outfit' },
+  4:  { type:'stories',   platform:'IG',    title:'Rutina de mañana', desc:'Café favorito + presentarte', time:'10:00', cat:'stories' },
+  5:  { type:'carrusel',  platform:'IG',    title:'Venecia: 7 tips', desc:'Cosas que nadie te dice de Venecia 🇮🇹', time:'19:00', cat:'viaje' },
+  6:  { type:'girlie',    platform:'IG+TT', title:'Cosas que hacemos las mujeres', desc:'Trend viral — formato opinión', time:'20:00', cat:'girlie' },
+  7:  { type:'stories',   platform:'IG',    title:'Domingo aesthetic', desc:'Stories tranqui con café ☕', time:'11:00', cat:'stories' },
+  8:  { type:'grwm',      platform:'IG+TT', title:'GRWM para la ofi', desc:'Look café/neutro — Get Ready With Me 💄', time:'07:30', cat:'lifestyle' },
+  9:  { type:'stories',   platform:'IG',    title:'Q&A Venecia', desc:'Respondé preguntas del viaje con fotos', time:'14:00', cat:'stories' },
+  10: { type:'reel',      platform:'IG+TT', title:'Un día en el Lago di Como', desc:'El más viral del viaje 🏔️', time:'18:00', cat:'viaje' },
+  11: { type:'stories',   platform:'IG',    title:'Adelanto haul', desc:'Sneak peek del haul de Avellaneda', time:'12:00', cat:'stories' },
+  12: { type:'girlie',    platform:'IG+TT', title:'Mi era soft girl', desc:'Aesthetic de vida que quiero tener 🌸', time:'19:00', cat:'girlie' },
+  13: { type:'haul',      platform:'IG+TT', title:'Haul Avellaneda', desc:'Gasté $X y encontré esto 🛍️', time:'17:00', cat:'haul' },
+  14: { type:'stories',   platform:'IG',    title:'Domingo de planificación', desc:'Stories de tu semana ideal', time:'11:00', cat:'stories' },
+  15: { type:'reel',      platform:'IG+TT', title:'Cinque Terre', desc:'Colores y atardecer — alto potencial viral 🌈', time:'18:30', cat:'viaje' },
+  16: { type:'stories',   platform:'IG',    title:'Encuesta audiencia', desc:'¿Preferís viajes o rutina en el feed?', time:'13:00', cat:'stories' },
+  17: { type:'outfit',    platform:'IG+TT', title:'Outfit check miércoles', desc:'El día que más ganas tengo de volver', time:'17:00', cat:'outfit' },
+  18: { type:'stories',   platform:'IG',    title:'Rutina de tarde', desc:'Mate, libro, serie — humanizate', time:'19:00', cat:'stories' },
+  19: { type:'girlie',    platform:'IG+TT', title:'Red flags en hoteles', desc:'Formato opinión que genera comentarios', time:'20:00', cat:'girlie' },
+  20: { type:'lifestyle', platform:'IG+TT', title:'Un día conmigo', desc:'Ofi + café + tarde 📱', time:'18:00', cat:'lifestyle' },
+  21: { type:'stories',   platform:'IG',    title:'Análisis métricas', desc:'Revisar qué funcionó la semana', time:'11:00', cat:'stories' },
+  22: { type:'reel',      platform:'IG+TT', title:'Mónaco', desc:'Lujo, F1 y el contraste con Niza 🇲🇨', time:'18:00', cat:'viaje' },
+  23: { type:'stories',   platform:'IG',    title:'Budget del viaje', desc:'¿Cuánto gasté en total? — genera interacción', time:'14:00', cat:'stories' },
+  24: { type:'haul',      platform:'IG+TT', title:'Haul Shein honesto', desc:'Lo que vale la pena y lo que no 🛒', time:'17:00', cat:'haul' },
+  25: { type:'stories',   platform:'IG',    title:'Preguntame lo que quieras', desc:'Q&A abierta — mueve el algoritmo', time:'12:00', cat:'stories' },
+  26: { type:'outfit',    platform:'IG+TT', title:'Outfit viernes', desc:'Modo fin de semana activado 🍂', time:'17:30', cat:'outfit' },
+  27: { type:'carrusel',  platform:'IG',    title:'Niza: guía completa', desc:'La Riviera francesa en 3 días 🌊', time:'19:00', cat:'viaje' },
+  28: { type:'stories',   platform:'IG',    title:'Domingo slow', desc:'Brunch o lectura aesthetic', time:'11:00', cat:'stories' },
+  29: { type:'girlie',    platform:'IG+TT', title:'Lo que aprendí viajando', desc:'Reflexivo + viral ✈️', time:'18:00', cat:'girlie' },
+  30: { type:'reel',      platform:'IG+TT', title:'Recap Italia & Francia', desc:'El resumen que nadie pidió 🎬', time:'18:30', cat:'viaje' },
+  31: { type:'lifestyle', platform:'IG',    title:'Mayo en fotos', desc:'Mezcla del mes + teaser de junio', time:'19:00', cat:'lifestyle' },
+};
+
+const TYPE_COLORS = {
+  reel:      { bg:'linear-gradient(135deg,#833AB4,#FD1D1D)', color:'white', label:'REEL' },
+  carrusel:  { bg:'rgba(122,79,45,0.12)', color:'#7A4F2D', label:'CARRUSEL', border:'1px solid rgba(122,79,45,0.2)' },
+  outfit:    { bg:'rgba(200,168,130,0.2)', color:'#7A4F2D', label:'OUTFIT' },
+  grwm:      { bg:'rgba(181,144,122,0.15)', color:'#9A6050', label:'GRWM' },
+  lifestyle: { bg:'rgba(143,168,130,0.15)', color:'#5a7a50', label:'LIFESTYLE' },
+  girlie:    { bg:'rgba(220,190,180,0.2)', color:'#9A6050', label:'GIRLIE 🌸' },
+  haul:      { bg:'rgba(44,26,14,0.1)', color:'#7A4F2D', label:'HAUL 🛍️' },
+  stories:   { bg:'linear-gradient(135deg,#833AB4,#FD1D1D)', color:'white', label:'STORIES' },
+};
+
+// ═══════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════
+const today = new Date();
+const tomorrow = new Date(today);
+tomorrow.setDate(today.getDate() + 1);
+
+const DAYS_ES = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
+const MONTHS_ES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+
+document.getElementById('headerDate').textContent =
+  `${DAYS_ES[today.getDay()]} ${today.getDate()} de ${MONTHS_ES[today.getMonth()]}`;
+
+// Fill tomorrow's post
+function renderTomorrowPost() {
+  const day = tomorrow.getDate();
+  const post = CALENDAR[day];
+  const el = document.getElementById('tomorrowPost');
+
+  if (!post || tomorrow.getMonth() !== 4) { // mes 4 = mayo
+    el.innerHTML = `<div class="gen-box"><span class="gen-placeholder">No hay post programado para mañana en el calendario de mayo ✨</span></div>`;
+    return;
+  }
+
+  const tc = TYPE_COLORS[post.type] || TYPE_COLORS.lifestyle;
+  el.innerHTML = `
+    <span class="post-type-badge" style="background:${tc.bg};color:${tc.color};${tc.border||''}">
+      ${tc.label}
+    </span>
+    ${post.platform.includes('TT') ? `<span class="post-type-badge badge-tiktok" style="margin-left:4px;">TIKTOK</span>` : ''}
+    <div class="post-title">${post.title}</div>
+    <div class="post-time">🕐 Subir a las ${post.time} hs &nbsp;·&nbsp; ${post.platform}</div>
+    <div style="font-size:13px;color:var(--ink-light);line-height:1.6;">${post.desc}</div>
+  `;
+}
+renderTomorrowPost();
+
+// ═══════════════════════════════════════════
+// MINI CALENDAR
+// ═══════════════════════════════════════════
+function renderMiniCal() {
+  const cal = document.getElementById('miniCal');
+  // Mayo 2026 starts on Friday (day 5 in 0-indexed Sun=0)
+  // But we show Mon-Sun, so offset = 3 (Thu, Fri = day 4 in Mon=0 system... May 1 2026 is Thursday)
+  const firstDay = new Date(2026, 4, 1).getDay(); // 4 = Thursday
+  const offset = firstDay === 0 ? 6 : firstDay - 1; // Mon=0
+  let html = '';
+  for (let i = 0; i < offset; i++) html += `<div class="mc-day empty"></div>`;
+  for (let d = 1; d <= 31; d++) {
+    const isToday = (d === today.getDate() && today.getMonth() === 4 && today.getFullYear() === 2026);
+    const hasPost = CALENDAR[d] && CALENDAR[d].type !== 'stories';
+    html += `<div class="mc-day ${isToday?'today':hasPost?'has-post':''}">${d}</div>`;
+  }
+  cal.innerHTML = html;
+}
+renderMiniCal();
+
+// ═══════════════════════════════════════════
+// CLAUDE API CALLS
+// ═══════════════════════════════════════════
+async function callClaude(prompt) {
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method:'POST',
+    headers:{ 'Content-Type':'application/json' },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 1000,
+      messages:[{ role:'user', content: prompt }]
+    })
+  });
+  const data = await res.json();
+  return data.content?.map(b => b.text||'').join('') || '';
+}
+
+function getPostContext() {
+  const day = tomorrow.getDate();
+  const post = CALENDAR[day];
+  if (!post || tomorrow.getMonth() !== 4) return 'post de lifestyle/viajes por Europa';
+  return `${post.title} — ${post.desc} (tipo: ${post.type}, categoría: ${post.cat})`;
+}
+
+async function generateCopy(type) {
+  const postCtx = getPostContext();
+  const extraCtx = document.getElementById('igContext')?.value || '';
+  const day = tomorrow.getDate();
+  const post = CALENDAR[day];
+
+  let prompt = '';
+  let btnId = '';
+  let resultId = '';
+
+  if (type === 'ig') {
+    btnId = 'btnGenIG'; resultId = 'igResult';
+    prompt = `Sos una creadora de contenido argentina, 18k seguidores en Instagram. Estética café/vintage/aesthetic. Viajes, moda y lifestyle. Tono: cercano, divertido, un poco poético, nunca forzado.
+
+Post de mañana: ${postCtx}
+${extraCtx ? `Contexto extra: ${extraCtx}` : ''}
+
+Generá:
+1. UN caption para Instagram (máximo 5 líneas, con emojis acordes a la estética, CTA al final como "guardalo ✈️" o "contame en comentarios 👇", en español argentino)
+2. 10-12 hashtags relevantes mezclando hashtags grandes y de nicho (viajes, moda, lifestyle argentino)
+
+Formato de respuesta EXACTO:
+CAPTION:
+[el caption]
+
+HASHTAGS:
+[los hashtags]`;
+  } else if (type === 'tt') {
+    btnId = 'btnGenTT'; resultId = 'ttResult';
+    prompt = `Sos una creadora de contenido argentina creciendo en TikTok (100 seguidores, querés llegar a 1k). Viajes, moda, lifestyle. Estética café/vintage.
+
+Post de mañana: ${postCtx}
+
+Generá un copy para TikTok:
+- Hook en la primera línea (máximo 8 palabras, que genere intriga o curiosidad)
+- 2-3 líneas de descripción con emojis
+- CTA para seguir ("Seguime para más 🗺️" o similar)
+- En español argentino, tono informal y directo
+
+Solo devolvé el texto listo para copiar, sin explicaciones.`;
+  } else if (type === 'story') {
+    btnId = 'btnGenStory'; resultId = 'storyResult';
+    prompt = `Sos una creadora de contenido argentina. Post de mañana: ${postCtx}
+
+Generá 3 ideas de stories para acompañar el post:
+1. Story de "adelanto" (antes de publicar)
+2. Story para compartir el post recién publicado (con texto llamativo)
+3. Story interactiva (encuesta o pregunta relacionada al tema)
+
+Cada idea en 1-2 líneas, con el texto exacto que pondría en la story y qué sticker/herramienta usar. En español argentino.`;
+  }
+
+  const btn = document.getElementById(btnId);
+  btn.disabled = true;
+  btn.innerHTML = `<div class="loading"><span>Generando</span><div class="dots"><span></span><span></span><span></span></div></div>`;
+
+  try {
+    const result = await callClaude(prompt);
+
+    if (type === 'ig') {
+      const captionMatch = result.match(/CAPTION:\n([\s\S]*?)\n\nHASHTAGS:/);
+      const hashtagMatch = result.match(/HASHTAGS:\n([\s\S]*)/);
+      document.getElementById('igCopyText').childNodes[0].textContent = captionMatch ? captionMatch[1].trim() : result;
+      document.getElementById('igHashtags').childNodes[0].textContent = hashtagMatch ? hashtagMatch[1].trim() : '';
+      document.getElementById('igResult').style.display = 'block';
+    } else if (type === 'tt') {
+      document.getElementById('ttCopyText').childNodes[0].textContent = result.trim();
+      document.getElementById('ttResult').style.display = 'block';
+    } else if (type === 'story') {
+      document.getElementById('storyCopyText').childNodes[0].textContent = result.trim();
+      document.getElementById('storyResult').style.display = 'block';
+    }
+  } catch(e) {
+    alert('Hubo un error generando el copy. Revisá tu conexión.');
+  }
+
+  btn.disabled = false;
+  if (type === 'ig') btn.innerHTML = `<span>✨</span> Regenerar caption`;
+  if (type === 'tt') btn.innerHTML = `<span>🎬</span> Regenerar copy TikTok`;
+  if (type === 'story') btn.innerHTML = `<span>💬</span> Regenerar story`;
+}
+
+// ═══════════════════════════════════════════
+// TRENDING TOPICS
+// ═══════════════════════════════════════════
+async function fetchTrending() {
+  const btn = document.getElementById('btnTrending');
+  btn.disabled = true;
+  btn.innerHTML = `<div class="loading"><span>Buscando tendencias</span><div class="dots"><span></span><span></span><span></span></div></div>`;
+
+  const today_str = `${today.getDate()} de ${MONTHS_ES[today.getMonth()]} de ${today.getFullYear()}`;
+
+  const prompt = `Hoy es ${today_str}. Sos un asistente de contenido para una creadora argentina de Instagram y TikTok (viajes, moda, lifestyle, estética café/vintage).
+
+Generá una lista de 6 tendencias actuales o evergreen de estas categorías que puede usar para crear contenido:
+1. Farándula o moda argentina (algo que esté en boca de todos)
+2. Tendencia de moda/outfits (algo viral en TikTok/IG)
+3. Tema "girlie" trending (relaciones, amor, self-love, etc.)
+4. Película, serie o libro del momento
+5. Tendencia de viajes (destino, formato de video, etc.)
+6. Tendencia de lifestyle (rutinas, food, wellness, etc.)
+
+Para cada una incluí:
+- Emoji representativo
+- Nombre de la tendencia (corto)
+- Cómo puede usarla esta creadora (1 oración)
+- Formato sugerido (Reel, Carrusel, Story, etc.)
+
+En español argentino. Formato:
+TENDENCIA|emoji|nombre|cómo usarla|formato
+(una por línea, sin numeración, sin explicaciones extra)`;
+
+  try {
+    const result = await callClaude(prompt);
+    const lines = result.trim().split('\n').filter(l => l.includes('|'));
+    let html = '';
+    lines.forEach(line => {
+      const parts = line.split('|');
+      if (parts.length >= 5) {
+        const [, emoji, nombre, como, formato] = parts;
+        html += `
+          <div class="trend-item">
+            <div class="trend-emoji">${emoji?.trim()}</div>
+            <div class="trend-content">
+              <div class="trend-name">${nombre?.trim()}</div>
+              <div class="trend-desc">${como?.trim()}</div>
+              <span class="trend-tag">${formato?.trim()}</span>
+            </div>
+          </div>`;
+      }
+    });
+    if (!html) html = `<div style="font-size:13px;opacity:0.6;font-style:italic;">${result}</div>`;
+    document.getElementById('trendingResult').innerHTML = html;
+    document.getElementById('trendingResult').style.display = 'block';
+  } catch(e) {
+    alert('Error buscando tendencias. Revisá tu conexión.');
+  }
+
+  btn.disabled = false;
+  btn.innerHTML = `<span>🔄</span> Actualizar tendencias`;
+}
+
+// ═══════════════════════════════════════════
+// TIPS DE EDICIÓN
+// ═══════════════════════════════════════════
+async function getEdicionTips() {
+  const btn = document.getElementById('btnEdicion');
+  btn.disabled = true;
+  btn.innerHTML = `<div class="loading"><span>Generando tips</span><div class="dots"><span></span><span></span><span></span></div></div>`;
+
+  const postCtx = getPostContext();
+  const day = tomorrow.getDate();
+  const post = CALENDAR[day];
+  const tipo = post?.type || 'reel';
+
+  const prompt = `Sos una experta en edición de contenido para Instagram y TikTok. Estética café/vintage/aesthetic.
+
+El post de mañana es: ${postCtx} (tipo: ${tipo})
+
+Generá 4 tips de edición específicos y accionables para este post:
+- App o herramienta exacta a usar (CapCut, Lightroom, Canva, etc.)
+- Qué hacer concretamente (filtro, efecto, transición, preset, etc.)
+- Un tip de audio/música si aplica
+
+Cada tip en 2 líneas máximo. En español argentino. Directo y práctico.
+Formato: TIP [número]: [texto]`;
+
+  try {
+    const result = await callClaude(prompt);
+    const tips = result.split('\n').filter(l => l.trim().startsWith('TIP'));
+    let html = '';
+    tips.forEach((tip, i) => {
+      const text = tip.replace(/^TIP\s*\d+:\s*/i, '').trim();
+      html += `<div class="tip-row">
+        <div class="tip-num">${String(i+1).padStart(2,'0')}</div>
+        <div class="tip-text">${text}</div>
+      </div>`;
+    });
+    if (!html) html = `<div style="font-size:13px;line-height:1.7;color:var(--ink);">${result}</div>`;
+    document.getElementById('edicionResult').innerHTML = html;
+    document.getElementById('edicionResult').style.display = 'block';
+  } catch(e) {
+    alert('Error generando tips. Revisá tu conexión.');
+  }
+
+  btn.disabled = false;
+  btn.innerHTML = `<span>✂️</span> Regenerar tips`;
+}
+
+// ═══════════════════════════════════════════
+// COPY TO CLIPBOARD
+// ═══════════════════════════════════════════
+function copyText(elemId, btn) {
+  const el = document.getElementById(elemId);
+  const text = el.childNodes[0]?.textContent || el.textContent;
+  navigator.clipboard.writeText(text.trim()).then(() => {
+    btn.textContent = '✓ Copiado';
+    btn.classList.add('copied');
+    setTimeout(() => {
+      btn.textContent = 'Copiar';
+      btn.classList.remove('copied');
+    }, 2000);
+  });
+}
+</script>
+</body>
+</html>
